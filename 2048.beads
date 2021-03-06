@@ -1,0 +1,160 @@
+beads 1 program Game2048
+
+// -------------------------------------------
+const
+	gap = 4
+	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
+
+record game  
+	won : yesno
+	noMoreMoves : yesno
+
+// -------------------------------------------
+var
+	board : array of num
+	g : game
+	blanks
+	moved : yesno
+	color : color
+
+// -------------------------------------------
+calc addTile
+	var
+		v = if random() > 0.9 then 4 else 2
+		p = random_int(1,blanks)
+	dec blanks
+	loop reps:16 count:ix
+		if is_numeric(board[ix])
+			continue
+		dec p
+		if p == 0
+			board[ix]=v
+			exit
+
+// -------------------------------------------
+calc canMove
+	var p = 1
+	g.noMoreMoves = N
+	if blanks > 0
+		return
+	loop reps:4
+		loop reps:3
+			if board[p] == board[p+1] or board[p] == board[p+4] 
+				return
+			inc p
+		inc p	
+	g.noMoreMoves = Y
+
+// -------------------------------------------
+calc init_board
+	board <=== []
+	blanks = 16
+	addTile
+	addTile
+	g.won = N
+	g.noMoreMoves = N
+	
+// -------------------------------------------
+calc trymove(
+	p1
+	ix
+	iy
+	)
+	var
+		x1
+		x2		
+	loop reps:4
+		x1=p1
+		x2=p1+ix
+		p1=p1+iy	
+		loop reps:3
+			if board[x2] == U
+				x2 = x2 + ix
+			elif board[x1] == U
+				board[x1] = board[x2]
+				board[x2] = U
+				x2 = x2 + ix
+				moved = Y
+			elif board[x1] == board[x2]
+				board[x1] = board[x1] * 2
+				if board[x1] == 2048
+					g.won = Y
+				inc blanks
+				moved = Y
+				board[x2] = U
+				x1 = x1 + ix
+				x2 = x2 + ix
+			else 
+				x1 = x1 + ix
+				if board[x1] == U
+					board[x1] = board[x2]
+					board[x2] = U
+					moved = Y
+				x2 = x2 + ix
+
+// -------------------------------------------
+grid d_board
+	horz slice
+		skip gap al
+		loop reps:4
+			add 40 al
+			skip gap al
+	vert slice
+		skip gap al
+		loop reps:4
+			add 40 al
+			skip gap al
+	under
+		draw_rect(fill:#BBADA0)
+	cell	
+		var 
+			v
+			ix = round(lg(board[b.cell_seq],base:2))
+		ix = if ix>12 then 13 else if ix>0 then ix+1 else 1
+		color = colors[ix]
+		v = if is_numeric(board[b.cell_seq]) then board[b.cell_seq] else ""
+		draw_rect(fill:color, thick:0 pt)
+		draw_str(v, size:0.5, bold:Y)
+	over
+		if g.won or g.noMoreMoves
+			var	msg : str
+			if g.won
+				color = DODGER_BLUE	
+				msg = "Congratulations!\nYou made it.\n2048"
+			if g.noMoreMoves
+				color=RED	
+				msg="Game over."
+			draw_rect(fill:color, thick:0 pt, opacity:0.8)	
+			draw_str(msg, size:0.5, bold:Y,vert:0.1,color:YELLOW)
+			draw_str("Press any key.", bold:Y,vert:0.9,color:YELLOW)
+		
+// -------------------------------------------
+track EV_KEYBOARD
+	if g.won
+		g.won = N
+		return Y
+	if g.noMoreMoves
+		init_board
+		return Y
+	moved = N
+	case e.keycode
+	| KEYCODE_UP
+		trymove(1, 4, 1)
+	| KEYCODE_LEFT
+		trymove(1, 1, 4)
+	| KEYCODE_DOWN
+		trymove(13, -4, 1)
+	| KEYCODE_RIGHT
+		trymove(4, -1, 4)
+	if moved
+		moved = N
+		addTile
+	canMove
+	
+// -------------------------------------------
+calc main_init
+	init_board
+	 
+// -------------------------------------------
+draw main_draw
+	layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:1) d_board		
