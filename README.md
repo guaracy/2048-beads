@@ -10,3 +10,5 @@ Para testar no seu computador (Firefox)
 3. clique em **mostrar tudo** 
 4. procure por **security.fileuri.strict_origin_policy** e mude para **false**
 5. abra o arquivo 2048.html com o seu navegador.
+
+Você também pode testar em [2048](https://guaracy.github.io/beads/sites/2048/2048.html)
