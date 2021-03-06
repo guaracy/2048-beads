@@ -46,6 +46,32 @@ calc canMove
 	g.noMoreMoves = Y
 
 // -------------------------------------------
+calc execMove(
+	dir
+	)
+	if g.won
+		g.won = N
+		return
+	if g.noMoreMoves
+		init_board
+		return
+	moved = N
+	case dir
+	| KEYCODE_UP
+		trymove(1, 4, 1)
+	| KEYCODE_LEFT
+		trymove(1, 1, 4)
+	| KEYCODE_DOWN
+		trymove(13, -4, 1)
+	| KEYCODE_RIGHT
+		trymove(4, -1, 4)
+	if moved
+		moved = N
+		addTile
+	canMove
+	
+	
+// -------------------------------------------
 calc init_board
 	board <=== []
 	blanks = 16
@@ -129,27 +155,22 @@ grid d_board
 			draw_str("Press any key.", bold:Y,vert:0.9,color:YELLOW)
 		
 // -------------------------------------------
+track EV_TAP
+	case b.cell_seq
+	|2,3
+		execMove(KEYCODE_UP)
+	|5,9
+		execMove(KEYCODE_LEFT)
+	|8,12
+		execMove(KEYCODE_RIGHT)
+	|14,15
+		execMove(KEYCODE_DOWN)
+	return Y
+	
+// -------------------------------------------
 track EV_KEYBOARD
-	if g.won
-		g.won = N
-		return Y
-	if g.noMoreMoves
-		init_board
-		return Y
-	moved = N
-	case e.keycode
-	| KEYCODE_UP
-		trymove(1, 4, 1)
-	| KEYCODE_LEFT
-		trymove(1, 1, 4)
-	| KEYCODE_DOWN
-		trymove(13, -4, 1)
-	| KEYCODE_RIGHT
-		trymove(4, -1, 4)
-	if moved
-		moved = N
-		addTile
-	canMove
+	execMove(e.keycode)
+	return Y
 	
 // -------------------------------------------
 calc main_init
