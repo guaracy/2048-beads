@@ -1,6 +1,6 @@
 # 2048-beads
 
-2048 em [beads](http://beadslang.org/)
+Implementação simples (sem pontuação nem número de movimentos) de 2048 em [beads](http://beadslang.org/)
 
 O [fonte](https://guaracy.github.io/beads/sites/2048/2048_src.html) ficou com 181 linhas (incluindo brancos e comentários) e sem nada de html, css ou javascript (deixe a parte enfadonha para o compilador).
 
