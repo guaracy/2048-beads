@@ -134,7 +134,7 @@ grid d_board
 		draw_rect(fill:#BBADA0)
 	cell	
 		var 
-			v
+			v  = board[b.cell_seq] if is_numeric(board[b.cell_seq]) else ""
 			ix = round(lg(board[b.cell_seq],base:2))
 		case ix
 		| >12
@@ -144,7 +144,6 @@ grid d_board
 		else
 			ix = 1			
 		color = colors[ix]
-		v = board[b.cell_seq] if is_numeric(board[b.cell_seq]) else ""
 		draw_rect(fill:color, thick:0 pt)
 		draw_str(v, size:0.5, bold:Y)
 	over

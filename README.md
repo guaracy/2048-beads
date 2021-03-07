@@ -2,7 +2,7 @@
 
 Implementação simples (sem pontuação nem número de movimentos) de 2048 em [beads](http://beadslang.org/)
 
-O [fonte](https://guaracy.github.io/beads/sites/2048/2048_src.html) ficou com 181 linhas (incluindo brancos e comentários) e sem nada de html, css ou javascript (deixe a parte enfadonha para o compilador).
+O [fonte](https://guaracy.github.io/beads/sites/2048/2048_src.html) ficou com 190 linhas (incluindo brancos e comentários) e sem nada de html, css ou javascript (deixe a parte enfadonha para o compilador).
 
 
 ![2048](assets/2048.gif)
@@ -20,6 +20,7 @@ O objetivo do jogo é juntar os blocos para formar um no valor de 2048. Entretan
 
 Use as setas para mover as peças. No celular clique nas posições 1 ou 2 para mover as peças para cima, 3 ou 4 para mover as peças para a direita, 5 ou 6 para mover as peças para baixo 7 ou 8 para mover as peças para a esquerda.
 
+Para reiniciar, pressione Esc.
 
 Para testar no seu computador (Firefox)
 
