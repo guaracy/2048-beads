@@ -20,7 +20,7 @@ var
 // -------------------------------------------
 calc addTile
 	var
-		v = if random() > 0.9 then 4 else 2
+		v = 2 if random() < 0.9 else 4
 		p = random_int(1,blanks)
 	dec blanks
 	loop reps:16 count:ix
@@ -136,9 +136,15 @@ grid d_board
 		var 
 			v
 			ix = round(lg(board[b.cell_seq],base:2))
-		ix = if ix>12 then 13 else if ix>0 then ix+1 else 1
+		case ix
+		| >12
+			ix = 13
+		| >0
+			inc ix
+		else
+			ix = 1			
 		color = colors[ix]
-		v = if is_numeric(board[b.cell_seq]) then board[b.cell_seq] else ""
+		v = board[b.cell_seq] if is_numeric(board[b.cell_seq]) else ""
 		draw_rect(fill:color, thick:0 pt)
 		draw_str(v, size:0.5, bold:Y)
 	over
@@ -169,6 +175,9 @@ track EV_TAP
 	
 // -------------------------------------------
 track EV_KEYBOARD
+	if e.keycode == KEYCODE_ESC
+		init_board
+		return Y
 	execMove(e.keycode)
 	return Y
 	
