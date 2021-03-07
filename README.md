@@ -1,8 +1,8 @@
 # 2048-beads
 
-Implementação simples (sem pontuação nem número de movimentos) de 2048 em [beads](http://beadslang.org/)
+Implementação do jogo 2048 em [beads](http://beadslang.org/)
 
-O [fonte](https://guaracy.github.io/beads/sites/2048/2048_src.html) ficou com 190 linhas (incluindo brancos e comentários) e sem nada de html, css ou javascript (deixe a parte enfadonha para o compilador).
+O [fonte](https://guaracy.github.io/beads/sites/2048/2048_src.html) ficou com 220 linhas (incluindo brancos e comentários) e sem nada de html, css ou javascript (deixe a parte enfadonha para o compilador).
 
 
 ![2048](assets/2048.gif)

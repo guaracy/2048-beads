@@ -8,6 +8,9 @@ const
 record game  
 	won : yesno
 	noMoreMoves : yesno
+	moves
+	score
+	best
 
 // -------------------------------------------
 var
@@ -15,6 +18,7 @@ var
 	g : game
 	blanks
 	moved : yesno
+	bkg : color
 	color : color
 
 // -------------------------------------------
@@ -66,6 +70,7 @@ calc execMove(
 	| KEYCODE_RIGHT
 		trymove(4, -1, 4)
 	if moved
+		inc g.moves
 		moved = N
 		addTile
 	canMove
@@ -77,6 +82,8 @@ calc init_board
 	blanks = 16
 	addTile
 	addTile
+	g.score = 0
+	g.moves = 0
 	g.won = N
 	g.noMoreMoves = N
 	
@@ -103,6 +110,9 @@ calc trymove(
 				moved = Y
 			elif board[x1] == board[x2]
 				board[x1] = board[x1] * 2
+				g.score = g.score + board[x1]
+				g.best = g.best if g.score < g.best else g.score
+				log "score: {g.score} best: {g.best}"
 				if board[x1] == 2048
 					g.won = Y
 				inc blanks
@@ -118,6 +128,24 @@ calc trymove(
 					moved = Y
 				x2 = x2 + ix
 
+// -------------------------------------------
+vert slice d_game
+	add 1 al d_top
+	add 9 al d_board
+
+// -------------------------------------------
+horz slice d_top
+	bkg = LIGHT_YELLOW
+	add 50 al
+		draw_rect(fill:bkg, thick:2 pt)
+		draw_str("Score\n{g.score}", size:0.3, bold:Y)	
+	add 50 al
+		draw_rect(fill:bkg, thick:2 pt)
+		draw_str("Best\n{g.best}", size:0.3, bold:Y)	
+	add 50 al
+		draw_rect(fill:bkg, thick:2 pt)
+		draw_str("Moves\n{g.moves}", size:0.3, bold:Y)	
+	
 // -------------------------------------------
 grid d_board
 	horz slice
@@ -182,8 +210,11 @@ track EV_KEYBOARD
 	
 // -------------------------------------------
 calc main_init
+	g.best = 0
+	g.score = 0
+	g.moves = 0
 	init_board
 	 
 // -------------------------------------------
 draw main_draw
-	layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:1) d_board		
+	layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:0.8) d_game		
