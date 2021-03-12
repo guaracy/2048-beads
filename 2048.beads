@@ -4,7 +4,10 @@ beads 1 program Game2048
 const
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
-
+	
+	STORE_APP = "appdata"
+	MYDB <=== { db_name:"com.beads.game2048", db_ver:1,	db_stores:[{store_name:STORE_APP} ]}
+	
 record game  
 	won : yesno
 	noMoreMoves : yesno
@@ -86,7 +89,9 @@ calc init_board
 	g.moves = 0
 	g.won = N
 	g.noMoreMoves = N
-	
+	log "gravar {g.best}"
+//	ixdb_write(MYDB, STORE_APP, 1, adr g)	
+
 // -------------------------------------------
 calc trymove(
 	p1
@@ -112,7 +117,6 @@ calc trymove(
 				board[x1] = board[x1] * 2
 				g.score = g.score + board[x1]
 				g.best = g.best if g.score < g.best else g.score
-				log "score: {g.score} best: {g.best}"
 				if board[x1] == 2048
 					g.won = Y
 				inc blanks
@@ -123,8 +127,7 @@ calc trymove(
 			else 
 				x1 = x1 + ix
 				if board[x1] == U
-					board[x1] = board[x2]
-					board[x2] = U
+					swap board[x1] <=> board[x2]
 					moved = Y
 				x2 = x2 + ix
 
@@ -137,13 +140,13 @@ vert slice d_game
 horz slice d_top
 	bkg = LIGHT_YELLOW
 	add 50 al
-		draw_rect(fill:bkg, thick:2 pt)
+		draw_rect(fill:bkg, thick:1 pt)
 		draw_str("Score\n{g.score}", size:0.3, bold:Y)	
 	add 50 al
-		draw_rect(fill:bkg, thick:2 pt)
+		draw_rect(fill:bkg, thick:1 pt)
 		draw_str("Best\n{g.best}", size:0.3, bold:Y)	
 	add 50 al
-		draw_rect(fill:bkg, thick:2 pt)
+		draw_rect(fill:bkg, thick:1 pt)
 		draw_str("Moves\n{g.moves}", size:0.3, bold:Y)	
 	
 // -------------------------------------------
@@ -172,7 +175,7 @@ grid d_board
 		else
 			ix = 1			
 		color = colors[ix]
-		draw_rect(fill:color, thick:0 pt)
+		draw_rect(fill:color, thick:0 pt,corner:5 pt)
 		draw_str(v, size:0.5, bold:Y)
 	over
 		if g.won or g.noMoreMoves
@@ -213,6 +216,7 @@ calc main_init
 	g.best = 0
 	g.score = 0
 	g.moves = 0
+	ixdb_read(MYDB, STORE_APP, 1, adr g)
 	init_board
 	 
 // -------------------------------------------
