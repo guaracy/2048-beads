@@ -5,9 +5,6 @@ const
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
 	
-	STORE_APP = "appdata"
-	MYDB <=== { db_name:"com.beads.game2048", db_ver:1,	db_stores:[{store_name:STORE_APP} ]}
-	
 record game  
 	won : yesno
 	noMoreMoves : yesno
@@ -216,7 +213,6 @@ calc main_init
 	g.best = 0
 	g.score = 0
 	g.moves = 0
-	ixdb_read(MYDB, STORE_APP, 1, adr g)
 	init_board
 	 
 // -------------------------------------------
