@@ -2,6 +2,7 @@ beads 1 program Game2048
 
 // -------------------------------------------
 const
+	DEBUG = N
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
 	
@@ -16,9 +17,9 @@ record game
 var
 	board : array of num
 	g : game
-	blanks
 	moved : yesno
 	bkg : color
+	blanks
 	color : color
 
 // -------------------------------------------
@@ -37,16 +38,23 @@ calc addTile
 
 // -------------------------------------------
 calc canMove
-	var p = 1
+	var
+		p = 1
 	g.noMoreMoves = N
 	if blanks > 0
 		return
-	loop reps:4
-		loop reps:3
-			if board[p] == board[p+1] or board[p] == board[p+4] 
-				return
+	loop reps:4 count:r
+		loop reps:4 count:c
+			log "pos: {r}x{c} p={p}" on:DEBUG
+			if c < 4
+				log "{board[p]}={board[p+1]}?" on:DEBUG
+				if board[p] == board[p+1]
+					return
+			if r < 4
+				log "{board[p]}={board[p+4]}?" on:DEBUG
+				if board[p] == board[p+4]
+					return
 			inc p
-		inc p	
 	g.noMoreMoves = Y
 
 // -------------------------------------------
@@ -75,7 +83,6 @@ calc execMove(
 		addTile
 	canMove
 	
-	
 // -------------------------------------------
 calc init_board
 	board <=== []
@@ -87,7 +94,10 @@ calc init_board
 	g.won = N
 	g.noMoreMoves = N
 	log "gravar {g.best}"
-//	ixdb_write(MYDB, STORE_APP, 1, adr g)	
+//	if DEBUG
+//		blanks = 0
+//		board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
+//		canMove
 
 // -------------------------------------------
 calc trymove(
