@@ -6,34 +6,43 @@ const
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
 	
-record game  
+record a_hof
+	date : str
+	score
+	
+record a_game
+	board : array of num
 	won : yesno
 	noMoreMoves : yesno
-	moves
-	score
-	best
+	menu : yesno
+	help : yesno
+	blanks : num
+	moves : num
+	size : num
+	score : num
+	best : num
+	scorem : num
+	hof : array of num
 
 // -------------------------------------------
 var
-	board : array of num
-	g : game
+	g : a_game
 	moved : yesno
 	bkg : color
-	blanks
 	color : color
 
 // -------------------------------------------
 calc addTile
 	var
 		v = 2 if random() < 0.9 else 4
-		p = random_int(1,blanks)
-	dec blanks
+		p = random_int(1,g.blanks)
+	dec g.blanks
 	loop reps:16 count:ix
-		if is_numeric(board[ix])
+		if is_numeric(g.board[ix])
 			continue
 		dec p
 		if p == 0
-			board[ix]=v
+			g.board[ix]=v
 			exit
 
 // -------------------------------------------
@@ -41,18 +50,18 @@ calc canMove
 	var
 		p = 1
 	g.noMoreMoves = N
-	if blanks > 0
+	if g.blanks > 0
 		return
 	loop reps:4 count:r
 		loop reps:4 count:c
 			log "pos: {r}x{c} p={p}" on:DEBUG
 			if c < 4
-				log "{board[p]}={board[p+1]}?" on:DEBUG
-				if board[p] == board[p+1]
+				log "{g.board[p]}={g.board[p+1]}?" on:DEBUG
+				if g.board[p] == g.board[p+1]
 					return
 			if r < 4
-				log "{board[p]}={board[p+4]}?" on:DEBUG
-				if board[p] == board[p+4]
+				log "{g.board[p]}={g.board[p+4]}?" on:DEBUG
+				if g.board[p] == g.board[p+4]
 					return
 			inc p
 	g.noMoreMoves = Y
@@ -85,8 +94,8 @@ calc execMove(
 	
 // -------------------------------------------
 calc init_board
-	board <=== []
-	blanks = 16
+	g.board <=== []
+	g.blanks = 16
 	addTile
 	addTile
 	g.score = 0
@@ -113,28 +122,28 @@ calc trymove(
 		x2=p1+ix
 		p1=p1+iy	
 		loop reps:3
-			if board[x2] == U
+			if g.board[x2] == U
 				x2 = x2 + ix
-			elif board[x1] == U
-				board[x1] = board[x2]
-				board[x2] = U
+			elif g.board[x1] == U
+				g.board[x1] = g.board[x2]
+				g.board[x2] = U
 				x2 = x2 + ix
 				moved = Y
-			elif board[x1] == board[x2]
-				board[x1] = board[x1] * 2
-				g.score = g.score + board[x1]
+			elif g.board[x1] == g.board[x2]
+				g.board[x1] = g.board[x1] * 2
+				g.score = g.score + g.board[x1]
 				g.best = g.best if g.score < g.best else g.score
-				if board[x1] == 2048
+				if g.board[x1] == 2048
 					g.won = Y
-				inc blanks
+				inc g.blanks
 				moved = Y
-				board[x2] = U
+				g.board[x2] = U
 				x1 = x1 + ix
 				x2 = x2 + ix
 			else 
 				x1 = x1 + ix
-				if board[x1] == U
-					swap board[x1] <=> board[x2]
+				if g.board[x1] == U
+					swap g.board[x1] <=> g.board[x2]
 					moved = Y
 				x2 = x2 + ix
 
@@ -172,8 +181,8 @@ grid d_board
 		draw_rect(fill:#BBADA0)
 	cell	
 		var 
-			v  = board[b.cell_seq] if is_numeric(board[b.cell_seq]) else ""
-			ix = round(lg(board[b.cell_seq],base:2))
+			v  = g.board[b.cell_seq] if is_numeric(g.board[b.cell_seq]) else ""
+			ix = round(lg(g.board[b.cell_seq],base:2))
 		case ix
 		| >12
 			ix = 13
