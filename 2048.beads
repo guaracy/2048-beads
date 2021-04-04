@@ -182,7 +182,8 @@ grid d_board
 		else
 			ix = 1			
 		color = colors[ix]
-		draw_rect(fill:color, thick:0 pt,corner:5 pt)
+		var radius = min(bb.height, bb.width)*0.1
+		draw_rect(fill:color, thick:0 pt,corner:radius)
 		draw_str(v, size:0.5, bold:Y)
 	over
 		if g.won or g.noMoreMoves
