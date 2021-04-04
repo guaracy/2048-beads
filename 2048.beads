@@ -33,7 +33,7 @@ var
 	color : color
 
 // -------------------------------------------
-calc addTile
+calc add_tile
 	var
 		v = 2 if random() < 0.9 else 4
 		p = random_int(1,g.blanks)
@@ -47,7 +47,7 @@ calc addTile
 			exit
 
 // -------------------------------------------
-calc canMove
+calc can_move
 	var
 		p = 1
 	//g.noMoreMoves = N
@@ -68,7 +68,7 @@ calc canMove
 	g.state = S_NOMOVES // g.noMoreMoves = Y
 
 // -------------------------------------------
-calc execMove(
+calc exec_move(
 	dir
 	)
 	if g.state == S_WON
@@ -80,32 +80,32 @@ calc execMove(
 	moved = N
 	case dir
 	| KEYCODE_UP
-		trymove(1, 4, 1)
+		try_move(1, 4, 1)
 	| KEYCODE_LEFT
-		trymove(1, 1, 4)
+		try_move(1, 1, 4)
 	| KEYCODE_DOWN
-		trymove(13, -4, 1)
+		try_move(13, -4, 1)
 	| KEYCODE_RIGHT
-		trymove(4, -1, 4)
+		try_move(4, -1, 4)
 	if moved
 		inc g.moves
 		moved = N
-		addTile
-	canMove
+		add_tile
+	can_move
 	
 // -------------------------------------------
 calc init_board
 	g.board <=== []
 	g.blanks = 16
-	addTile
-	addTile
+	add_tile
+	add_tile
 	g.score = 0
 	g.moves = 0
 	g.state = S_PLAY
 	log "gravar {g.best}"
 
 // -------------------------------------------
-calc trymove(
+calc try_move(
 	p1
 	ix
 	iy
@@ -207,13 +207,13 @@ grid d_board
 track EV_TAP
 	case b.cell_seq
 	|2,3
-		execMove(KEYCODE_UP)
+		exec_move(KEYCODE_UP)
 	|5,9
-		execMove(KEYCODE_LEFT)
+		exec_move(KEYCODE_LEFT)
 	|8,12
-		execMove(KEYCODE_RIGHT)
+		exec_move(KEYCODE_RIGHT)
 	|14,15
-		execMove(KEYCODE_DOWN)
+		exec_move(KEYCODE_DOWN)
 	return Y
 	
 // -------------------------------------------
@@ -221,7 +221,7 @@ track EV_KEYBOARD
 	if e.keycode == KEYCODE_ESC
 		init_board
 		return Y
-	execMove(e.keycode)
+	exec_move(e.keycode)
 	return Y
 	
 // -------------------------------------------
@@ -234,7 +234,7 @@ calc main_init
 		g.blanks = 0
 		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
 		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 1024 1024 256 64]
-		canMove
+		can_move
 	 
 // -------------------------------------------
 draw main_draw
