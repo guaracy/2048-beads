@@ -12,10 +12,11 @@ record a_hof
 	
 record a_game
 	board : array of num
-	won : yesno
-	noMoreMoves : yesno
-	menu : yesno
-	help : yesno
+	state  : (S_PLAY, S_NOMOVES, S_WON, S_CONTINUE, S_HELP, S_MENU, S_MOBILE, S_END)
+	//won : yesno
+	//noMoreMoves : yesno
+	//menu : yesno
+	//help : yesno
 	blanks : num
 	moves : num
 	size : num
@@ -49,7 +50,7 @@ calc addTile
 calc canMove
 	var
 		p = 1
-	g.noMoreMoves = N
+	//g.noMoreMoves = N
 	if g.blanks > 0
 		return
 	loop reps:4 count:r
@@ -64,16 +65,16 @@ calc canMove
 				if g.board[p] == g.board[p+4]
 					return
 			inc p
-	g.noMoreMoves = Y
+	g.state = S_NOMOVES // g.noMoreMoves = Y
 
 // -------------------------------------------
 calc execMove(
 	dir
 	)
-	if g.won
-		g.won = N
+	if g.state == S_WON
+		g.state = S_CONTINUE
 		return
-	if g.noMoreMoves
+	if g.state == S_NOMOVES
 		init_board
 		return
 	moved = N
@@ -100,13 +101,8 @@ calc init_board
 	addTile
 	g.score = 0
 	g.moves = 0
-	g.won = N
-	g.noMoreMoves = N
+	g.state = S_PLAY
 	log "gravar {g.best}"
-//	if DEBUG
-//		blanks = 0
-//		board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
-//		canMove
 
 // -------------------------------------------
 calc trymove(
@@ -134,7 +130,7 @@ calc trymove(
 				g.score = g.score + g.board[x1]
 				g.best = g.best if g.score < g.best else g.score
 				if g.board[x1] == 2048
-					g.won = Y
+					g.state = S_WON //won = Y
 				inc g.blanks
 				moved = Y
 				g.board[x2] = U
@@ -195,12 +191,12 @@ grid d_board
 		draw_rect(fill:color, thick:0 pt,corner:radius)
 		draw_str(v, size:0.5, bold:Y)
 	over
-		if g.won or g.noMoreMoves
+		if g.state == S_WON or g.state == S_NOMOVES //g.won or g.noMoreMoves
 			var	msg : str
-			if g.won
+			if g.state == S_WON //won
 				color = DODGER_BLUE	
 				msg = "Congratulations!\nYou made it.\n2048"
-			if g.noMoreMoves
+			if g.state == S_NOMOVES //g.noMoreMoves
 				color=RED	
 				msg="Game over."
 			draw_rect(fill:color, thick:0 pt, opacity:0.8)	
@@ -234,6 +230,11 @@ calc main_init
 	g.score = 0
 	g.moves = 0
 	init_board
+	if DEBUG
+		g.blanks = 0
+		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
+		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 1024 1024 256 64]
+		canMove
 	 
 // -------------------------------------------
 draw main_draw
