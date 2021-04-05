@@ -5,6 +5,24 @@ const
 	DEBUG = N
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
+	pak = 'Press any key.'
+	help_msg ='''
+➧ The goal of this game is make a tile reach the value of 2048
+➧ The board starts of with two occupied tiles
+➧ On each round a new tile gets added with the value of 2 or
+at 10% of the times with the value of 4
+➧ If you run out of tiles you lose
+➧ There are 4 movements you can supply to the game
+using arrows keys (right, left, up, and down)
+➧ For each of this movements the tiles move to the direction
+specified
+➧ If two tiles have the same value the get added up just once.
+➧ If 2 occupied tiles share the same row or column but are
+seperated by empty tiles then the occupied tiles travel along
+the empty tiles stacking in the direction they were directed
+
+* Press 'h' for this help.
+'''
 	
 record a_hof
 	date : str
@@ -24,9 +42,35 @@ record a_game
 // -------------------------------------------
 var
 	g : a_game
+	p_state : num
 	moved : yesno
 	bkg : color
 	color : color
+	msg : str
+
+// -------------------------------------------
+var bt : a_rect
+vert slice d_msg(
+	bkcolor:color = DODGER_BLUE
+	justify:num = CENTER
+	)
+	under
+		draw_rect(fill:bkcolor, thick:0 pt, opacity:0.8)
+	add 9 al
+		log '{justify}'
+		var is_help = g.state == S_HELP
+		draw_str(msg, size:0.5, bold:N if is_help else Y ,color:YELLOW,just:justify)
+	add 1 al
+		bt <=== bb
+		draw_rect(box:bb, fill:SIENNA, thick:1 pt)
+		draw_str(pak, size:0.5, bold:Y,color:YELLOW)
+	skip 1 al
+track
+	case e.evkind
+	| EV_TAP, EV_KEYBOARD
+		if g.state == S_HELP
+			g.state = p_state
+		return Y
 
 // -------------------------------------------
 calc add_tile
@@ -125,7 +169,8 @@ calc try_move(
 				g.score = g.score + g.board[x1]
 				g.best = g.best if g.score < g.best else g.score
 				if g.board[x1] == 2048
-					g.state = S_WON
+					if g.state == S_PLAY
+						g.state = S_WON
 				inc g.blanks
 				moved = Y
 				g.board[x2] = U
@@ -186,22 +231,26 @@ grid d_board
 		draw_rect(fill:color, thick:0 pt,corner:radius)
 		draw_str(v, size:0.5, bold:Y)
 	over
-		if g.state == S_WON or g.state == S_NOMOVES
-			var	msg : str
-			if g.state == S_WON
-				color = DODGER_BLUE	
-				msg = "Congratulations!\nYou made it.\n2048"
-			if g.state == S_NOMOVES
-				color=RED	
-				msg="Game over."
-			draw_rect(fill:color, thick:0 pt, opacity:0.8)	
-			draw_str(msg, size:0.5, bold:Y,vert:0.1,color:YELLOW)
-			draw_str("Press any key.", bold:Y,vert:0.9,color:YELLOW)
+		case g.state
+		| S_WON
+			msg = 'Congratulations!\nYou made it.\n2048'
+			d_msg
+		| S_NOMOVES
+			msg="Game over."
+			d_msg(bkcolor:RED)
+		| S_HELP
+			msg = help_msg
+			d_msg(justify:LEFT)
 	
 // -------------------------------------------
 track EV_KEYBOARD
 	if e.keycode == KEYCODE_ESC
+		// wait for confirm in v42
 		init_board
+		return Y
+	if e.keycode == 72 // H
+		p_state = g.state
+		g.state = S_HELP
 		return Y
 	exec_move(e.keycode)
 	return Y
@@ -221,7 +270,7 @@ calc main_init
 // -------------------------------------------
 draw main_draw
 	if runtime.touch_kind == TOUCH_FINGER
-		draw_rect(fill:ORANGE)
-		draw_str('Sorry.\nThis games is not working\non mobiles yet.\nWait for a new version.', color:YELLOW, bold:Y)
+		draw_rect(fill:ORANGE_RED)
+		draw_str('Sorry.\nThis games is not working\non mobiles yet.\nPlease, wait for a new version.', color:YELLOW, bold:Y)
 	else
 		layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:0.8) d_game		
