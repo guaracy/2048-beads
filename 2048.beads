@@ -39,6 +39,7 @@ record a_hof
 	score
 	
 record a_game
+	version : num
 	board : array of num
 	state  : (S_PLAY, S_NOMOVES, S_WON, S_CONTINUE, S_HELP, S_MENU, S_MOBILE, S_END)
 	blanks : num
