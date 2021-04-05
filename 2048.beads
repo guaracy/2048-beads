@@ -13,10 +13,6 @@ record a_hof
 record a_game
 	board : array of num
 	state  : (S_PLAY, S_NOMOVES, S_WON, S_CONTINUE, S_HELP, S_MENU, S_MOBILE, S_END)
-	//won : yesno
-	//noMoreMoves : yesno
-	//menu : yesno
-	//help : yesno
 	blanks : num
 	moves : num
 	size : num
@@ -50,7 +46,6 @@ calc add_tile
 calc can_move
 	var
 		p = 1
-	//g.noMoreMoves = N
 	if g.blanks > 0
 		return
 	loop reps:4 count:r
@@ -65,7 +60,7 @@ calc can_move
 				if g.board[p] == g.board[p+4]
 					return
 			inc p
-	g.state = S_NOMOVES // g.noMoreMoves = Y
+	g.state = S_NOMOVES
 
 // -------------------------------------------
 calc exec_move(
@@ -130,7 +125,7 @@ calc try_move(
 				g.score = g.score + g.board[x1]
 				g.best = g.best if g.score < g.best else g.score
 				if g.board[x1] == 2048
-					g.state = S_WON //won = Y
+					g.state = S_WON
 				inc g.blanks
 				moved = Y
 				g.board[x2] = U
@@ -191,30 +186,17 @@ grid d_board
 		draw_rect(fill:color, thick:0 pt,corner:radius)
 		draw_str(v, size:0.5, bold:Y)
 	over
-		if g.state == S_WON or g.state == S_NOMOVES //g.won or g.noMoreMoves
+		if g.state == S_WON or g.state == S_NOMOVES
 			var	msg : str
-			if g.state == S_WON //won
+			if g.state == S_WON
 				color = DODGER_BLUE	
 				msg = "Congratulations!\nYou made it.\n2048"
-			if g.state == S_NOMOVES //g.noMoreMoves
+			if g.state == S_NOMOVES
 				color=RED	
 				msg="Game over."
 			draw_rect(fill:color, thick:0 pt, opacity:0.8)	
 			draw_str(msg, size:0.5, bold:Y,vert:0.1,color:YELLOW)
 			draw_str("Press any key.", bold:Y,vert:0.9,color:YELLOW)
-		
-// -------------------------------------------
-track EV_TAP
-	case b.cell_seq
-	|2,3
-		exec_move(KEYCODE_UP)
-	|5,9
-		exec_move(KEYCODE_LEFT)
-	|8,12
-		exec_move(KEYCODE_RIGHT)
-	|14,15
-		exec_move(KEYCODE_DOWN)
-	return Y
 	
 // -------------------------------------------
 track EV_KEYBOARD
@@ -238,4 +220,8 @@ calc main_init
 	 
 // -------------------------------------------
 draw main_draw
-	layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:0.8) d_game		
+	if runtime.touch_kind == TOUCH_FINGER
+		draw_rect(fill:ORANGE)
+		draw_str('Sorry.\nThis games is not working\non mobiles yet.\nWait for a new version.', color:YELLOW, bold:Y)
+	else
+		layer area:solve_rect(basis:b.box, pin:MID_CENTER, aspect:0.8) d_game		
