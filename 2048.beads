@@ -21,7 +21,9 @@ specified
 seperated by empty tiles then the occupied tiles travel along
 the empty tiles stacking in the direction they were directed
 
-* Press 'h' for this help.
+* Press 'H' for this help.
+* Press 'N' for new game.
+* Press 'Backspace' to undo last move. 
 '''
 	
 record a_hof
@@ -43,6 +45,7 @@ record a_game
 var
 	g : a_game
 	p_state : num
+	p_game : a_game
 	moved : yesno
 	bkg : color
 	color : color
@@ -117,6 +120,7 @@ calc exec_move(
 		init_board
 		return
 	moved = N
+	p_game <=== g
 	case dir
 	| KEYCODE_UP
 		try_move(1, 4, 1)
@@ -141,7 +145,7 @@ calc init_board
 	g.score = 0
 	g.moves = 0
 	g.state = S_PLAY
-	log "gravar {g.best}"
+	p_game <=== g
 
 // -------------------------------------------
 calc try_move(
@@ -244,14 +248,16 @@ grid d_board
 	
 // -------------------------------------------
 track EV_KEYBOARD
-	if e.keycode == KEYCODE_ESC
+	if e.keycode == 78 // N - new game
 		// wait for confirm in v42
 		init_board
 		return Y
-	if e.keycode == 72 // H
+	if e.keycode == 72 // H - help
 		p_state = g.state
 		g.state = S_HELP
 		return Y
+	if e.keycode == KEYCODE_BS // undu last move
+		g <=== p_game
 	exec_move(e.keycode)
 	return Y
 	
