@@ -1,8 +1,15 @@
 beads 1 program Game2048
 
 // -------------------------------------------
+assets local:"snd/"
+	file:"end.ogg" label:SOUND_LOST
+	file:"win.ogg" label:SOUND_WON
+	file:"swipe.ogg" label:SOUND_SWIPE
+	file:"select.ogg" label:SOUND_SELECT
+
+// -------------------------------------------
 const
-	DEBUG = N
+	DEBUG = Y
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
 	pak = 'Press any key.'
@@ -71,8 +78,13 @@ vert slice d_msg(
 track
 	case e.evkind
 	| EV_TAP, EV_KEYBOARD
-		if g.state == S_HELP
+		case g.state
+		| S_WON
+			g.state = S_CONTINUE
+		| S_HELP
 			g.state = p_state
+		| S_NOMOVES
+			init_board
 		return Y
 
 // -------------------------------------------
@@ -108,17 +120,20 @@ calc can_move
 					return
 			inc p
 	g.state = S_NOMOVES
+	sound_play(SOUND_LOST)
 
 // -------------------------------------------
 calc exec_move(
 	dir
 	)
+	/*
 	if g.state == S_WON
 		g.state = S_CONTINUE
 		return
 	if g.state == S_NOMOVES
 		init_board
 		return
+	*/
 	moved = N
 	p_game <=== g
 	case dir
@@ -131,6 +146,7 @@ calc exec_move(
 	| KEYCODE_RIGHT
 		try_move(4, -1, 4)
 	if moved
+		sound_play(SOUND_SWIPE)
 		inc g.moves
 		moved = N
 		add_tile
@@ -174,6 +190,8 @@ calc try_move(
 				g.best = g.best if g.score < g.best else g.score
 				if g.board[x1] == 2048
 					if g.state == S_PLAY
+						sound_play(SOUND_WON)
+						log "play sound won"
 						g.state = S_WON
 				inc g.blanks
 				moved = Y
@@ -245,7 +263,6 @@ grid d_board
 		| S_HELP
 			msg = help_msg
 			d_msg(justify:LEFT)
-	
 // -------------------------------------------
 track EV_KEYBOARD
 	if e.keycode == 78 // N - new game
