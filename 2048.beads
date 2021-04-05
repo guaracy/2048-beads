@@ -9,7 +9,8 @@ assets local:"snd/"
 
 // -------------------------------------------
 const
-	DEBUG = Y
+	DEBUG = N
+	duration = 1 day // change to 30 days or more - 
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
 	pak = 'Press any key.'
@@ -59,7 +60,7 @@ var
 	msg : str
 
 // -------------------------------------------
-var bt : a_rect
+//var bt : a_rect
 vert slice d_msg(
 	bkcolor:color = DODGER_BLUE
 	justify:num = CENTER
@@ -71,8 +72,8 @@ vert slice d_msg(
 		var is_help = g.state == S_HELP
 		draw_str(msg, size:0.5, bold:N if is_help else Y ,color:YELLOW,just:justify)
 	add 1 al
-		bt <=== bb
-		draw_rect(box:bb, fill:SIENNA, thick:1 pt)
+		//bt <=== bb
+		draw_rect(fill:SIENNA, thick:1 pt, opacity:0.7)
 		draw_str(pak, size:0.5, bold:Y,color:YELLOW)
 	skip 1 al
 track
@@ -146,10 +147,11 @@ calc exec_move(
 	| KEYCODE_RIGHT
 		try_move(4, -1, 4)
 	if moved
-		sound_play(SOUND_SWIPE)
+		//sound_play(SOUND_SWIPE)
 		inc g.moves
 		moved = N
 		add_tile
+		cookie_write('2048',g,duration:duration)
 	can_move
 	
 // -------------------------------------------
@@ -280,10 +282,15 @@ track EV_KEYBOARD
 	
 // -------------------------------------------
 calc main_init
-	g.best = 0
-	g.score = 0
-	g.moves = 0
-	init_board
+	if cookie_exists('2048')
+		g <=== cookie_read('2048') as a_game
+		p_game <=== g
+		can_move
+	else
+		g.best = 0
+		g.score = 0
+		g.moves = 0
+		init_board
 	if DEBUG
 		g.blanks = 0
 		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
