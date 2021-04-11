@@ -213,20 +213,22 @@ draw my_button (
 	prompt : str
 	action : calc (frozen)
 	)
-	var radius = min(bb.height, bb.width)*0.1
-	draw_rect(fill:SKY_BLUE, color:STEEL_BLUE, pos:0,corner:radius, thick:1,pos:0)
+	var g = min(bb.height, bb.width)*0.2
+	var r = solve_rect(basis:bb,inset:g)
+	var radius = min(r.height, r.width)*0.1
+	draw_rect(box:r,fill:SKY_BLUE, color:STEEL_BLUE, pos:0,corner:radius, thick:1,pos:0)
 	draw_str(prompt, color:STEEL_BLUE, size:0.4, bold:Y)
 track EV_TAP
 	action()
 	return Y
 // -------------------------------------------
 horz slice d_buttons
+	under
+		draw_rect(fill:GRAY4)
 	add 20 al
 		my_button('Undo',undo_move)
-	skip 1 al
 	add 20 al
 		my_button('New',new_game)
-	skip 1 al
 	add 20 al
 		my_button('HOF',not_yet)
 // -------------------------------------------
