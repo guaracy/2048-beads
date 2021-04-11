@@ -10,6 +10,7 @@ assets local:"snd/"
 // -------------------------------------------
 const
 	DEBUG = N
+	VERSION = 1
 	duration = 1 day // change to 30 days or more - 
 	gap = 4
 	colors = [#cdc1b4 #eee4da #ede0c8 #f2b179 #f59563 #f67c5f #f65e3b #edcf72 #edcc61 #edc850 #edc53f #edc22e #edc22e]
@@ -41,7 +42,7 @@ record a_hof
 record a_game
 	version : num
 	board : array of num
-	state  : (S_PLAY, S_NOMOVES, S_WON, S_CONTINUE, S_HELP, S_MENU, S_MOBILE, S_END)
+	state  : (S_PLAY S_NOMOVES S_WON S_CONTINUE S_HELP S_MENU S_MOBILE S_END)
 	blanks : num
 	moves : num
 	size : num
@@ -61,19 +62,18 @@ var
 	msg : str
 
 // -------------------------------------------
-//var bt : a_rect
 vert slice d_msg(
-	bkcolor:color = DODGER_BLUE
-	justify:num = CENTER
+	fgcolor : color = YELLOW
+	bkcolor : color = DODGER_BLUE
+	align : num = CENTER
+	fbold : yesno = Y
 	)
 	under
 		draw_rect(fill:bkcolor, thick:0 pt, opacity:0.8)
+		log 'M:{msg} AL:{align} BL:{fbold}'
 	add 9 al
-		log '{justify}'
-		var is_help = g.state == S_HELP
-		draw_str(msg, size:0.5, bold:N if is_help else Y ,color:YELLOW,just:justify)
+		draw_str(msg, color:fgcolor, size:0.5, just:align, bold:fbold) 
 	add 1 al
-		//bt <=== bb
 		draw_rect(fill:SIENNA, thick:1 pt, opacity:0.7)
 		draw_str(pak, size:0.5, bold:Y,color:YELLOW)
 	skip 1 al
@@ -209,21 +209,43 @@ calc try_move(
 				x2 = x2 + ix
 
 // -------------------------------------------
+draw my_button (
+	prompt : str
+	action : calc (frozen)
+	)
+	var radius = min(bb.height, bb.width)*0.1
+	draw_rect(fill:SKY_BLUE, color:STEEL_BLUE, pos:0,corner:radius, thick:1,pos:0)
+	draw_str(prompt, color:STEEL_BLUE, size:0.4, bold:Y)
+track EV_TAP
+	action()
+	return Y
+// -------------------------------------------
+horz slice d_buttons
+	add 20 al
+		my_button('Undo',undo_move)
+	skip 1 al
+	add 20 al
+		my_button('New',new_game)
+	skip 1 al
+	add 20 al
+		my_button('HOF',not_yet)
+// -------------------------------------------
 vert slice d_game
 	add 1 al d_top
 	add 9 al d_board
+	add 1 al d_buttons
 
 // -------------------------------------------
 horz slice d_top
 	bkg = LIGHT_YELLOW
 	add 50 al
-		draw_rect(fill:bkg, thick:1 pt)
+		draw_rect(fill:bkg, thick:1 pt,pos:0)
 		draw_str("Score\n{g.score}", size:0.3, bold:Y)	
 	add 50 al
-		draw_rect(fill:bkg, thick:1 pt)
+		draw_rect(fill:bkg, thick:1 pt,pos:0)
 		draw_str("Best\n{g.best}", size:0.3, bold:Y)	
 	add 50 al
-		draw_rect(fill:bkg, thick:1 pt)
+		draw_rect(fill:bkg, thick:1 pt,pos:0)
 		draw_str("Moves\n{g.moves}", size:0.3, bold:Y)	
 	
 // -------------------------------------------
@@ -265,24 +287,40 @@ grid d_board
 			d_msg(bkcolor:RED)
 		| S_HELP
 			msg = help_msg
-			d_msg(justify:LEFT)
+			d_msg(fgcolor:RED,fbold:N,align:LEFT)
+			
 // -------------------------------------------
 track EV_KEYBOARD
 	if e.keycode == 78 // N - new game
-		// wait for confirm in v42
-		init_board
+		new_game
 		return Y
 	if e.keycode == 72 // H - help
 		p_state = g.state
 		g.state = S_HELP
 		return Y
 	if e.keycode == KEYCODE_BS // undu last move
-		g <=== p_game
+		undo_move
 	exec_move(e.keycode)
 	return Y
-	
+
+calc new_game
+	if browser_confirm('Are you shure?')
+		init_board
+calc undo_move
+	g <=== p_game
+
+calc not_yet
+	browser_alert('Sorry\nNot implemented yet')
+		
 // -------------------------------------------
 calc main_init
+	if DEBUG
+		init_board
+		g.blanks = 0
+		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
+		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 1024 1024 256 64]
+		can_move
+		return
 	if cookie_exists('2048')
 		g <=== cookie_read('2048') as a_game
 		p_game <=== g
@@ -292,11 +330,6 @@ calc main_init
 		g.score = 0
 		g.moves = 0
 		init_board
-	if DEBUG
-		g.blanks = 0
-		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 2048 512 256 64]
-		g.board <=== [2 4 8 4 8 2 16 4 32 128 32 8 1024 1024 256 64]
-		can_move
 	 
 // -------------------------------------------
 draw main_draw
